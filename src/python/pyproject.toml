@@ -1,0 +1,31 @@
+[project]
+name = "theiaengine"
+description = "Python SDK for TheiaEngine API"
+version = "2023.07.01"
+authors = [
+  { name="Moses Olafenwa", email="guymodscientist@gmail.com" }
+]
+readme = "THEIA_ENGINE_PYTHON.md"
+requires-python = ">=3.7"
+
+dependencies = [
+    "requests >= 2.31.0",
+    "opencv-python >= 4.7.0.72"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+keywords = ["vision", "ai", "ml", "computer-vision", "2D", "3D", "object-detection", "image-classification", "image-recognition", "object-tracking", "gpt", "deep-learning"]
+
+[project.urls]
+"Homepage" = "https://github.com/Gen-XR/TheiaEngine"
+"Bug Tracker" = "https://github.com/Gen-XR/TheiaEngine/issues"
+
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
