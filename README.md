@@ -22,14 +22,14 @@ TheiaEngine API is currently being going through beta testing. You can join the 
 - Copy the API key you received for the beta testing and run any of the samples below.
 
 
-- Scene description
-- Scene QA
-- Human Analysis
-- OCR
-- Vehicle Detection
-- Object Detection
-- All responses at once.
-- Coming soon
+- [Scene description](#scene-description)
+- [Scene QA](#scene-qa)
+- [Human Analysis](#human-analysis)
+- [OCR](#ocr)
+- [Vehicle Detection](#vehicle-detection)
+- [Object Detection](#object-detection)
+- [All responses at once](#all-responses-at-once)
+- [Coming soon](#coming-soon)
 
 
 ## Scene Description
@@ -435,3 +435,5 @@ The following features will be added soon to the API
 - Scene mapping 
   - ![](images/scene_mapping.jpg)
 - Image Embedding/Search
+- Image Generation/Augmentation
+  - ![](images/augmentation.jpg)
