@@ -1,1 +1,0 @@
-# TheiaEngine Python SDK
