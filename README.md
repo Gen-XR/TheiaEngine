@@ -11,7 +11,7 @@ TheiaEngine is a multi-modal Vision AI API that is built to perform most compute
 ![](images/all.jpg)
 
 # Getting Started ( Insider Testing )
-TheiaEngine API is currently being going through beta testing. You can join the beta testers by following [this link](https://forms.gle/LBGPBvuFVk4Y72xP8) and sign up for an API key and server URL.
+TheiaEngine API is currently being going through beta testing. You can join the **beta testers** by following [this link](https://github.com/Gen-XR/TheiaEngine/discussions/2) to the TheiaEngine discussions and sign up for an API key and server URL.
 
 
 - Ensure you have Python 3.7 or higher installed
