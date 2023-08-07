@@ -20,8 +20,7 @@ TheiaEngine API is currently being going through beta testing. You can join the 
     pip install theiaengine
     ```
 - Copy the API key you received for the beta testing and run any of the samples below.
-
-
+- The maximum image resolution for uploads for now is `1500 x 1500 pixels`. This will be increased by general availability.
 - [Scene description](#scene-description)
 - [Scene QA](#scene-qa)
 - [Human Analysis](#human-analysis)
