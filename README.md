@@ -34,7 +34,30 @@ TheiaEngine API is currently being going through beta testing. You can join the 
 ## Scene Description
 By default, TheiaEngine returns a short description of a scene based on the content and context of the image. Below is a sample to retrieve description of an image.
 
-**Code:**
+**Curl / REST API**
+
+```
+curl -X POST "<server_URL>/upload?api_key=<api_key>" -F "files=@demo.jpg" -o response.json --max-time 600
+cat response.json
+```
+
+```json
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "92eddf4c-096e-40ca-b9ee-cd53e354562b",
+        "transaction_id": "ae057d03-b091-42e1-8bae-df3b6ee5d447",
+        "image_name": "demo.jpg", 
+        "date_time": "2023-08-11 18:00:54.601445",
+        "description": "a woman sitting on top of a car",
+        "detections": [],
+        "questions": [], 
+        "ocr": []
+    }
+}
+```
+
+**Python Code:**
 
 ```python
 
@@ -79,7 +102,32 @@ description: a car show in a parking lot
 TheiaEngine allows you to obtain answers to multiple content and context questions of what is in an image.
 See sample below.
 
-**Code:**
+**Curl / REST API**
+```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&questions=what%20is%20the%20season%20of%20the%20image;%20is%20the%20lady%20in%20the%20image%20running%20or%20sitting;%20is%20the%20car%20in%20the%20image%20moving" -F "files=@demo.jpg" -o response.json --max-time 600
+cat response.json
+```
+```json
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "9e3430e5-1f7f-4141-b34c-e7a1698b19d7", 
+        "transaction_id": "1f2271d2-aa9f-4699-96bc-141223916136", 
+        "image_name": "demo.jpg", 
+        "date_time": "2023-08-11 18:44:53.801750", 
+        "description": "a woman sitting on top of a car", 
+        "detections": [], 
+        "questions": [
+            {"what is the season of the image": "fall"}, 
+            {" is the lady in the image running or sitting": "sitting"}, 
+            {" is the car in the image moving": "no"}
+        ], 
+        "ocr": []
+    }
+}
+```
+
+**Python Code:**
 
 ```python
 from theiaengine import TheiaClient, TheiaPayload, TheiaResponseStatus
@@ -157,6 +205,43 @@ TheiaEngine can provide in depth analysis of each person in an image. For each p
 
 See sample below.
 
+**Curl / REST API**
+```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&return_human_analysis=True" -F "files=@demo.jpg" -o response.json --max-time 600
+cat response.json
+```
+```json
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "90d48ee4-c148-4fcc-bfd0-17ae42e9f20f", 
+        "transaction_id": "a3cdf7d3-a2ff-4241-90b3-5923718dea3b", 
+        "image_name": "demo.jpg", 
+        "date_time": "2023-08-11 18:05:59.295328", 
+        "description": "a woman sitting on top of a car", 
+        "detections": [
+            {
+                "bbox": [298, 177, 470, 504], 
+                "name": "person", 
+                "analysis": {
+                    "extras": [], 
+                    "gender": "female", 
+                    "race": "caucasian", 
+                    "top_clothing": "leather", 
+                    "lower_clothing": "skirt", 
+                    "footwear": "nothing"
+                }
+            }
+        ], 
+        "questions": [], 
+        "ocr": []}
+}
+
+```
+
+
+**Python code**
+
 ```python
 from theiaengine import TheiaClient, TheiaPayload, TheiaResponseStatus
 
@@ -205,6 +290,39 @@ TheiaEngine provides OCR and number plate recognition in images. For each text i
 - bbox ( xmin, ymin, xmax, ymax )
 
 See sample below.
+
+**Curl / REST API**
+```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&return_ocr=True" -F "files=@car_park.jpg" -o response.json --max-time 600
+cat response.json
+```
+```json
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "6704d134-5863-4d96-b6cf-3ac7950c5c85", 
+        "transaction_id": "e65190a2-b46b-4905-8ab2-e3e801cf0cfc", 
+        "image_name": "car_park.jpg", 
+        "date_time": "2023-08-11 18:51:26.048273", 
+        "description": "a car show in a parking lot", 
+        "detections": [], 
+        "questions": [], 
+        "ocr": [
+            {"text": "BOOTHS", "bbox": [978, 320, 1084, 343]}, 
+            {"text": "", "bbox": [738, 388, 772, 399]}, 
+            {"text": "Lloydsphammaey", "bbox": [140, 418, 239, 446]}, 
+            {"text": "Lloydshmsy", "bbox": [280, 430, 351, 455]}, 
+            {"text": "C", "bbox": [153, 460, 169, 470]}, 
+            {"text": "", "bbox": [179, 453, 226, 482]}, 
+            {"text": "00", "bbox": [187, 475, 213, 487]}, 
+            {"text": "YC52MRV", "bbox": [64, 555, 110, 570]}, 
+            {"text": "SVO3SFJ", "bbox": [218, 601, 281, 622]}
+        ]
+    }
+}
+```
+
+**Python Code**
 
 ```python
 
@@ -271,7 +389,56 @@ TheiaEngine can detect and give bbox and analysis on the following types of vehi
 
 See sample below
 
+**Curl / REST API**
 ```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&return_vehicles=True" -F "files=@vehicles.jpg" -o response.json --max-time 600
+cat response.json
+```
+```json
+
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "43151b91-b457-49bf-ad43-a02bd78c0f90", 
+        "transaction_id": "91852bb7-86c8-4297-9e2e-55f4a30875f2", 
+        "image_name": "vehicles.jpg", 
+        "date_time": "2023-08-11 18:57:09.960619", 
+        "description": "a fleet of trucks", 
+        "detections": [
+            {
+                "bbox": [193, 155, 375, 303], 
+                "name": "car", 
+                "analysis": {"extras": [], "color": "red"}, "vehicle_plate": {"plate_number": "EE", "plate_bbox": [243, 223, 285, 233]}
+            }, 
+            {
+                "bbox": [385, 143, 593, 304], 
+                "name": "pickup truck", 
+                "analysis": {"extras": [], "color": "white"}, 
+                "vehicle_plate": {}
+            }, 
+            {
+                "bbox": [493, 76, 800, 288], 
+                "name": "truck", 
+                "analysis": {"extras": [], "color": "white"}, 
+                "vehicle_plate": {"plate_number": "snu", "plate_bbox": [735, 219, 758, 225]}
+            }, 
+            {
+                "bbox": [0, 179, 205, 299], 
+                "name": "car", 
+                "analysis": {"extras": [], "color": "black"}, 
+                "vehicle_plate": {}
+            }
+        ], 
+        "questions": [], 
+        "ocr": []
+    }
+}
+
+```
+
+**Python code**
+
+```python
 from theiaengine import TheiaClient, TheiaPayload, TheiaResponseStatus
 
 theia_client = TheiaClient(
@@ -314,7 +481,62 @@ TheiaEngine supports standard object detection and can detect 300+ objects. For 
 
 See sample below.
 
+**Curl / REST API**
+
 ```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&return_objects=True" -F "files=@living_room.webp" -o response.json --max-time 600
+cat response.json
+```
+
+```json
+{
+    "message": "successful", 
+    "result": {
+        "image_id": "23d66ff2-4ed9-4528-896e-cd472430ac10", 
+        "transaction_id": "03aa9dfa-83dd-49be-accc-07a2a3c476d9", 
+        "image_name": "living_room.webp", 
+        "date_time": "2023-08-11 19:42:42.591462", 
+        "description": "a living room with a green couch and colorful pillows", 
+        "detections": [
+            {"bbox": [695, 426, 877, 518], "name": "pillow", "analysis": {"extras": [], "color": "orange"}}, 
+            {"bbox": [1023, 425, 1176, 567], "name": "pillow", "analysis": {"extras": [], "color": "brown"}}, 
+            {"bbox": [1212, 497, 1225, 566], "name": "candle", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [430, 1, 791, 171], "name": "cabinet/shelf", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [456, 130, 516, 159], "name": "book", "analysis": {"extras": [], "color": "red and yellow"}}, 
+            {"bbox": [632, 349, 688, 387], "name": "book", "analysis": {"extras": [], "color": "black"}}, 
+            {"bbox": [368, 531, 689, 713], "name": "stool", "analysis": {"extras": [], "color": "green"}}, 
+            {"bbox": [553, 25, 589, 70], "name": "vase", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [701, 256, 766, 335], "name": "person", "analysis": {"extras": [], "gender": "female"}}, 
+            {"bbox": [844, 522, 942, 606], "name": "book", "analysis": {"extras": [], "color": "yellow"}}, 
+            {"bbox": [934, 563, 1058, 607], "name": "book", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [1022, 430, 1146, 597], "name": "flower", "analysis": {"extras": [], "color": "yellow"}}, 
+            {"bbox": [692, 346, 771, 385], "name": "book", "analysis": {"extras": [], "color": "black"}}, 
+            {"bbox": [348, 75, 444, 254], "name": "cabinet/shelf", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [363, 336, 411, 386], "name": "vase", "analysis": {"extras": [], "color": "green"}}, 
+            {"bbox": [349, 415, 1335, 706], "name": "couch", "analysis": {"extras": [], "color": "green"}}, 
+            {"bbox": [1146, 573, 1243, 603], "name": "book", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [258, 269, 369, 598], "name": "lamp", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [95, 622, 429, 786], "name": "stool", "analysis": {"extras": [], "color": "green"}}, 
+            {"bbox": [1074, 418, 1197, 524], "name": "pillow", "analysis": {"extras": [], "color": "brown"}}, 
+            {"bbox": [707, 94, 782, 159], "name": "book", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [422, 484, 631, 546], "name": "pillow", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [431, 387, 612, 499], "name": "pillow", "analysis": {"extras": [], "color": "brown"}}, 
+            {"bbox": [1165, 454, 1353, 522], "name": "pillow", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [692, 240, 774, 348], "name": "picture/frame", "analysis": {"extras": [], "color": "black and white"}}, 
+            {"bbox": [572, 190, 635, 251], "name": "picture/frame", "analysis": {"extras": [], "color": "black"}}, 
+            {"bbox": [11, 479, 174, 600], "name": "pillow", "analysis": {"extras": [], "color": "red"}}, 
+            {"bbox": [783, 312, 849, 387], "name": "lamp", "analysis": {"extras": [], "color": "white"}}, 
+            {"bbox": [574, 420, 726, 523], "name": "pillow", "analysis": {"extras": [], "color": "yellow"}}, 
+            {"bbox": [476, 183, 559, 289], "name": "picture/frame", "analysis": {"extras": [], "color": "black"}}, 
+            {"bbox": [864, 383, 1047, 526], "name": "pillow", "analysis": {"extras": [], "color": "pink"}}, 
+            {"bbox": [996, 0, 1152, 248], "name": "lamp", "analysis": {"extras": [], "color": "white"}}], "questions": [], "ocr": []
+    }
+}
+```
+
+**Python code**
+
+```python
 from theiaengine import TheiaClient, TheiaPayload, TheiaResponseStatus
 
 theia_client = TheiaClient(
@@ -390,7 +612,16 @@ You can retrieve all possible results from TheiaEnine by setting all available r
 
 See sample code below
 
+**Curl / REST API**
+
 ```
+curl -X POST "<server_URL>/upload?api_key=<api_key>&questions=what%20is%20the%20season%20of%20the%20image;%20is%20the%20lady%20in%20the%20image%20running%20or%20sitting;%20is%20the%20car%20in%20the%20image%20moving&return_objects=True&return_human_analysis=True&return_ocr=True&return_vehicles=True" -F "files=@car_park.jpg" -o response.json --max-time 600
+cat response.json
+```
+
+**Python Code**
+
+```python
 from theiaengine import TheiaClient, TheiaPayload, TheiaResponseStatus
 
 theia_client = TheiaClient(
