@@ -1,0 +1,183 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - theia-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    ports:
+    # To learn about configuring Kafka for access across networks see
+    # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - ./kafka_config.properties:/etc/kafka/server.properties
+    networks:
+      - theia-network
+  
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - ./.aws:/etc/localstack/init/ready.d
+    networks:
+      - theia-network
+  
+  theiaapi:
+    image: ${API_IMAGE}
+    restart: "on-failure"
+    ports:
+      - "80:8135"
+    depends_on:
+      - kafka
+      - zookeeper
+    volumes:
+      - ${AUTH_DIR}:/activations
+      - ./.aws:/root/.aws
+      - ${DOCKER_ENGINE_MOUNT}:/var/run/docker.sock
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_OUTPUT_TOPIC: ${DETECTOR_TOPIC}
+      KAFKA_RELAY_TOPIC_PREFIX: ${KAFKA_RELAY_TOPIC_PREFIX}
+      KAFKA_OUTPUT_PARTITION_COUNT: ${DETECTOR_INPUT_PARTITION_COUNT}
+      
+      API_KEY: ${API_KEY}
+      CUDA: ${ENABLE_CUDA}
+      ACTIVATION_KEY: ${ACTIVATION_KEY}
+      LOCALSTACK_URL: ${LOCALSTACK_URL}
+      GEN_BUCKET: ${THEIA_GEN_BUCKET}
+      OS_TYPE: ${OS_TYPE}
+      OS_VERSION: ${OS_VERSION}
+      OS_ARCH: ${OS_ARCH}
+      OS_NETWORK: ${OS_NETWORK}
+
+      START_IMAGE_GEN: ${ENABLE_IMAGE_GEN}
+      START_QUERY: ${ENABLE_QUERY}
+      START_OCR: ${ENABLE_OCR}
+    networks:
+      - theia-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  
+  theiadetector:
+    image: ${DETECTOR_IMAGE}
+    restart: "on-failure"
+    depends_on:
+      - theiaapi
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_INPUT_TOPIC: ${DETECTOR_TOPIC}
+      KAFKA_QUERY_TOPIC: ${QUERY_TOPIC}
+      KAFKA_OCR_TOPIC: ${OCR_TOPIC}
+      KAFKA_GEN_TOPIC: ${GEN_TOPIC}
+      KAFKA_QUERY_PARTITION_COUNT: ${QUERY_INPUT_PARTITION_COUNT}
+      KAFKA_OCR_PARTITION_COUNT: ${OCR_INPUT_PARTITION_COUNT}
+      KAFKA_GEN_PARTITION_COUNT: ${GEN_INPUT_PARTITION_COUNT}
+      KAFKA_POST_THEIA_TOPIC: ${POST_THEIA_TOPIC}
+      ENABLE_QUERY: ${ENABLE_QUERY}
+      ENABLE_OCR: ${ENABLE_OCR}
+      ENABLE_IMAGE_GEN: ${ENABLE_IMAGE_GEN}
+    networks:
+      - theia-network
+  
+  theiaocr:
+    image: ${OCR_IMAGE}
+    restart: "on-failure"
+    depends_on:
+      - theiadetector
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_INPUT_TOPIC: ${OCR_TOPIC}
+      KAFKA_OUTPUT_TOPIC: ${POST_THEIA_TOPIC}
+      
+    networks:
+      - theia-network
+  
+  posttheia:
+    image: ${POST_THEIA_IMAGE}
+    restart: "on-failure"
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_INPUT_TOPIC: ${POST_THEIA_TOPIC}
+    networks:
+      - theia-network
+
+  theiaquery:
+    image: ${THEIA_QUERY_IMAGE}
+    restart: "on-failure"
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_INPUT_TOPIC: ${QUERY_TOPIC}
+      KAFKA_OUTPUT_TOPIC: ${POST_THEIA_TOPIC}
+      DISABLE_QUERY_GPU: ${DISABLE_QUERY_GPU}
+    networks:
+      - theia-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+
+  theiagen:
+    image: ${THEIA_GEN_IMAGE}
+    restart: "on-failure"
+    depends_on:
+      - kafka
+      - zookeeper
+      - localstack
+    environment:
+      KAFKA_SERVER: "kafka:29092"
+      KAFKA_INPUT_TOPIC: ${GEN_TOPIC}
+      KAFKA_OUTPUT_TOPIC: ${POST_THEIA_TOPIC}
+      ENABLE_SAFETY: ${IMAGE_GEN_SAFETY}
+      LOCALSTACK_URL: ${LOCALSTACK_URL}
+      GEN_BUCKET: ${THEIA_GEN_BUCKET}
+      DISABLE_IMAGE_GEN_GPU: ${DISABLE_IMAGE_GEN_GPU}
+      IMAGE_GEN_MAX_SIZE: ${IMAGE_GEN_MAX_SIZE}
+    volumes:
+      - ./.aws:/root/.aws
+    networks:
+      - theia-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  
+
+networks:
+  theia-network:
+    name: theia_internal_network
